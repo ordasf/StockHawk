@@ -75,6 +75,11 @@ public final class QuoteSyncJob {
                 Stock stock = quotes.get(symbol);
                 StockQuote quote = stock.getQuote();
 
+                if (quote == null) {
+                    // TODO Show an error informing that the quote does not exist!
+                    return;
+                }
+
                 float price = quote.getPrice().floatValue();
                 float change = quote.getChange().floatValue();
                 float percentChange = quote.getChangeInPercent().floatValue();
