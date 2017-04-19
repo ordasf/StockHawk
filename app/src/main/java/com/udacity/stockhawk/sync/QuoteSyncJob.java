@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.widget.Toast;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -75,9 +76,10 @@ public final class QuoteSyncJob {
                 Stock stock = quotes.get(symbol);
                 StockQuote quote = stock.getQuote();
 
-                if (quote == null) {
+                if (quote == null || quote.getPrice() == null) {
                     // TODO Show an error informing that the quote does not exist!
-                    return;
+                    Toast.makeText(context, "The Stock does not exist", Toast.LENGTH_SHORT).show();
+                    continue;
                 }
 
                 float price = quote.getPrice().floatValue();
