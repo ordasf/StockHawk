@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">ستوك هوك</string>
 
     <string name="dialog_title">الأسهم، هوك</string>
     <string name="dialog_hint">الرمز (مثل غوغ)</string>
