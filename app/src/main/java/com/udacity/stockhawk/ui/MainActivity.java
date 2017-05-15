@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.model.StockQuote;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import java.util.List;
@@ -46,22 +47,28 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.error)
     TextView error;
     private StockAdapter adapter;
-    public static final String DETAIL_STOCK_SYMBOL = "detail_stock_symbol";
-    public static final String HISTORY_STOCK_SYMBOL = "history_stock_symbol";
+    public static final String DETAIL_STOCK_QUOTE = "detail_stock_quote";
 
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
         Intent detailStockIntent = new Intent(this, DetailStockActivity.class);
-        detailStockIntent.putExtra(DETAIL_STOCK_SYMBOL, symbol);
-        Cursor quote = getContentResolver().query(
+
+        Cursor dbQuote = getContentResolver().query(
                 Contract.Quote.makeUriForStock(symbol),
                 Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{}),
                 null, null, null);
-        if (quote != null && quote.moveToNext()) {
-            String history = quote.getString(Contract.Quote.POSITION_HISTORY);
-            detailStockIntent.putExtra(HISTORY_STOCK_SYMBOL, history);
+
+        if (dbQuote != null && dbQuote.moveToNext()) {
+            long id = dbQuote.getLong(Contract.Quote.POSITION_ID);
+            float price = dbQuote.getFloat(Contract.Quote.POSITION_PRICE);
+            float absoluteChange = dbQuote.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+            float percentageChange = dbQuote.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+            String history = dbQuote.getString(Contract.Quote.POSITION_HISTORY);
+            StockQuote stockQuote = new StockQuote(id, symbol, price, absoluteChange, percentageChange, history);
+            detailStockIntent.putExtra(DETAIL_STOCK_QUOTE, stockQuote);
         }
+
         startActivity(detailStockIntent);
     }
 

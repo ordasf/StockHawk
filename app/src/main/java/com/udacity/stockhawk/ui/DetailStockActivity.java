@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.model.StockQuote;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -46,58 +47,53 @@ public class DetailStockActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            if (extras.containsKey(MainActivity.DETAIL_STOCK_SYMBOL)) {
-                String symbol = extras.getString(MainActivity.DETAIL_STOCK_SYMBOL);
-                detailStockTextView.setText(symbol);
-                detailStockTextView.setContentDescription(symbol);
+        if (extras != null && extras.containsKey(MainActivity.DETAIL_STOCK_QUOTE)) {
+
+            StockQuote quote = extras.getParcelable(MainActivity.DETAIL_STOCK_QUOTE);
+            String history = quote.getHistory();
+
+            CSVReader reader = new CSVReader(new CharArrayReader(history.toCharArray()));
+            List<String[]> quotesOverTime = null;
+            try {
+                quotesOverTime = reader.readAll();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            if (extras.containsKey(MainActivity.HISTORY_STOCK_SYMBOL)) {
-                String history = extras.getString(MainActivity.HISTORY_STOCK_SYMBOL);
-                //historyStockTextView.setText(history);
-                //historyStockTextView.setContentDescription(history);
-                CSVReader reader = new CSVReader(new CharArrayReader(history.toCharArray()));
-                List<String[]> quotesOverTime = null;
-                try {
-                    quotesOverTime = reader.readAll();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
-                if (quotesOverTime == null) {
-                    return;
-                }
-
-                Collections.reverse(quotesOverTime);
-
-                List<Entry> entries = new ArrayList<>();
-                final String[] dateLabels = new String[quotesOverTime.size()];
-                for (int i = 0; i < quotesOverTime.size(); i++) {
-                    String[] historicQuote = quotesOverTime.get(i);
-                    dateLabels[i] = DateFormat.format("dd/MM/yyyy", Long.parseLong(historicQuote[0])).toString();
-                    entries.add(new Entry(i, Float.parseFloat(historicQuote[1])));
-                }
-                LineDataSet dataSet = new LineDataSet(entries, "caca");
-                dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-                LineData lineData = new LineData(dataSet);
-                lineChart.setData(lineData);
-                lineChart.setBackgroundColor(Color.WHITE);
-
-                // Redraw
-                lineChart.invalidate();
-
-                // Put the correct labels in the x axis
-                IAxisValueFormatter formatter = new IAxisValueFormatter() {
-                    @Override
-                    public String getFormattedValue(float value, AxisBase axis) {
-                        return dateLabels[(int) value];
-                    }
-                };
-
-                XAxis xAxis = lineChart.getXAxis();
-                xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
-                xAxis.setValueFormatter(formatter);
+            if (quotesOverTime == null) {
+                return;
             }
+
+            Collections.reverse(quotesOverTime);
+
+            List<Entry> entries = new ArrayList<>();
+            final String[] dateLabels = new String[quotesOverTime.size()];
+            for (int i = 0; i < quotesOverTime.size(); i++) {
+                String[] historicQuote = quotesOverTime.get(i);
+                dateLabels[i] = DateFormat.format("dd/MM/yyyy", Long.parseLong(historicQuote[0])).toString();
+                entries.add(new Entry(i, Float.parseFloat(historicQuote[1])));
+            }
+            LineDataSet dataSet = new LineDataSet(entries, "caca");
+            dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+            LineData lineData = new LineData(dataSet);
+            lineChart.setData(lineData);
+            lineChart.setBackgroundColor(Color.WHITE);
+
+            // Redraw
+            lineChart.invalidate();
+
+            // Put the correct labels in the x axis
+            IAxisValueFormatter formatter = new IAxisValueFormatter() {
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+                    return dateLabels[(int) value];
+                }
+            };
+
+            XAxis xAxis = lineChart.getXAxis();
+            xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+            xAxis.setValueFormatter(formatter);
+
         }
 
     }
