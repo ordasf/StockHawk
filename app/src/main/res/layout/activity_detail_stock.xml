@@ -58,6 +58,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_price_detail_stock" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_price_detail_stock"
+        android:contentDescription="@string/stock_chart_content_description"/>
 
 </android.support.constraint.ConstraintLayout>
