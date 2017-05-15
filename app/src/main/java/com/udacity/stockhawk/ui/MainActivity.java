@@ -25,6 +25,8 @@ import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -45,12 +47,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     TextView error;
     private StockAdapter adapter;
     public static final String DETAIL_STOCK_SYMBOL = "detail_stock_symbol";
+    public static final String HISTORY_STOCK_SYMBOL = "history_stock_symbol";
 
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
         Intent detailStockIntent = new Intent(this, DetailStockActivity.class);
         detailStockIntent.putExtra(DETAIL_STOCK_SYMBOL, symbol);
+        Cursor quote = getContentResolver().query(
+                Contract.Quote.makeUriForStock(symbol),
+                Contract.Quote.QUOTE_COLUMNS.toArray(new String[]{}),
+                null, null, null);
+        if (quote != null && quote.moveToNext()) {
+            String history = quote.getString(Contract.Quote.POSITION_HISTORY);
+            detailStockIntent.putExtra(HISTORY_STOCK_SYMBOL, history);
+        }
         startActivity(detailStockIntent);
     }
 
