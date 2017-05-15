@@ -3,18 +3,24 @@ package com.udacity.stockhawk.ui;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.udacity.stockhawk.R;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -51,30 +57,48 @@ public class DetailStockActivity extends AppCompatActivity {
                 //historyStockTextView.setText(history);
                 //historyStockTextView.setContentDescription(history);
                 CSVReader reader = new CSVReader(new CharArrayReader(history.toCharArray()));
+                List<String[]> quotesOverTime = null;
                 try {
-                    List<String[]> quotesOverTime = reader.readAll();
-                    System.out.println(quotesOverTime);
-                    List<Entry> entries = new ArrayList<>();
-                    for (String[] historicQuote : quotesOverTime) {
-                        long millis = Long.parseLong(historicQuote[0]);
-                        float price = Float.parseFloat(historicQuote[1]);
-                        entries.add(new Entry(millis, price));
-                    }
-                    LineDataSet dataSet = new LineDataSet(entries, "caca");
-                    dataSet.setColor(Color.CYAN);
-                    dataSet.setValueTextColor(Color.GREEN);
-                    dataSet.setLineWidth(10.0F);
-                    LineData lineData = new LineData(dataSet);
-                    lineChart.setData(lineData);
-                    lineChart.invalidate();
+                    quotesOverTime = reader.readAll();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                if (quotesOverTime == null) {
+                    return;
+                }
+
+                Collections.reverse(quotesOverTime);
+
+                List<Entry> entries = new ArrayList<>();
+                final String[] dateLabels = new String[quotesOverTime.size()];
+                for (int i = 0; i < quotesOverTime.size(); i++) {
+                    String[] historicQuote = quotesOverTime.get(i);
+                    dateLabels[i] = DateFormat.format("dd/MM/yyyy", Long.parseLong(historicQuote[0])).toString();
+                    entries.add(new Entry(i, Float.parseFloat(historicQuote[1])));
+                }
+                LineDataSet dataSet = new LineDataSet(entries, "caca");
+                dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+                LineData lineData = new LineData(dataSet);
+                lineChart.setData(lineData);
+                lineChart.setBackgroundColor(Color.WHITE);
+
+                // Redraw
+                lineChart.invalidate();
+
+                // Put the correct labels in the x axis
+                IAxisValueFormatter formatter = new IAxisValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value, AxisBase axis) {
+                        return dateLabels[(int) value];
+                    }
+                };
+
+                XAxis xAxis = lineChart.getXAxis();
+                xAxis.setGranularity(1f); // minimum axis-step (interval) is 1
+                xAxis.setValueFormatter(formatter);
             }
         }
-        // TODO Extract the historic crap and paint it in the activity
-        // TODO We are getting the symbol, but it might be better to get the historic data
-        // TODO find the library to paint charts
-        // TODO Paint it, I don't mind about RTL and shit like that at this moment
+
     }
 }
