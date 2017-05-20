@@ -36,4 +36,5 @@
 
     <string name="add_stock_button_content_description">Add Stock</string>
     <string name="stock_chart_content_description">Chart to inform about the variation of the price of the time of this particular stock</string>
+    <string name="empty_quote_list">No Weather Information Available</string>
 </resources>
