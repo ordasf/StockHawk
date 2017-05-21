@@ -1,13 +1,10 @@
 package com.udacity.stockhawk.ui;
 
 import android.graphics.Color;
-import android.os.Build;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -50,25 +47,18 @@ public class DetailStockActivity extends AppCompatActivity {
     @BindView(R.id.chart_detail_stock)
     LineChart lineChart;
 
-    private final DecimalFormat dollarFormatWithPlus;
-    private final DecimalFormat dollarFormat;
-    private final DecimalFormat percentageFormat;
-
-    DetailStockActivity() {
-        super();
-
-        dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
-        dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
-        dollarFormatWithPlus.setPositivePrefix("+$");
-        percentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
-        percentageFormat.setMaximumFractionDigits(2);
-        percentageFormat.setMinimumFractionDigits(2);
-        percentageFormat.setPositivePrefix("+");
-    }
+    private final DecimalFormat dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
+    private final DecimalFormat dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
+    private final DecimalFormat percentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        dollarFormatWithPlus.setPositivePrefix("+$");
+        percentageFormat.setMaximumFractionDigits(2);
+        percentageFormat.setMinimumFractionDigits(2);
+        percentageFormat.setPositivePrefix("+");
 
         setContentView(R.layout.activity_detail_stock);
         ButterKnife.bind(this);
@@ -77,6 +67,11 @@ public class DetailStockActivity extends AppCompatActivity {
         if (extras != null && extras.containsKey(MainActivity.DETAIL_STOCK_QUOTE)) {
 
             StockQuote quote = extras.getParcelable(MainActivity.DETAIL_STOCK_QUOTE);
+
+            if (quote == null) {
+                return;
+            }
+
             String history = quote.getHistory();
 
             // Populate the data into the Text Views
@@ -134,7 +129,7 @@ public class DetailStockActivity extends AppCompatActivity {
     private List<String[]> readHistoricData(String history) {
 
         CSVReader reader = new CSVReader(new CharArrayReader(history.toCharArray()));
-        List<String[]> quotesOverTime = null;
+        List<String[]> quotesOverTime;
         try {
             quotesOverTime = reader.readAll();
         } catch (IOException e) {

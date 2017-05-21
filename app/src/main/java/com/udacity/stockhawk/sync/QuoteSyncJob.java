@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.widget.Toast;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -27,7 +26,6 @@ import timber.log.Timber;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
-import yahoofinance.histquotes.Interval;
 import yahoofinance.quotes.stock.StockQuote;
 
 public final class QuoteSyncJob {
@@ -47,8 +45,7 @@ public final class QuoteSyncJob {
         Timber.d("Running sync job");
 
         Calendar from = Calendar.getInstance();
-        Calendar to = Calendar.getInstance();
-        from.add(Calendar.YEAR, -YEARS_OF_HISTORY);
+        from.add(Calendar.YEAR, - YEARS_OF_HISTORY);
 
         try {
 
@@ -78,8 +75,6 @@ public final class QuoteSyncJob {
                 StockQuote quote = stock.getQuote();
 
                 if (quote == null || quote.getPrice() == null) {
-                    // TODO Show an error informing that the quote does not exist!
-                    Toast.makeText(context, "The Stock does not exist", Toast.LENGTH_SHORT).show();
                     continue;
                 }
 

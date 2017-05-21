@@ -26,8 +26,6 @@ import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.model.StockQuote;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -67,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             String history = dbQuote.getString(Contract.Quote.POSITION_HISTORY);
             StockQuote stockQuote = new StockQuote(id, symbol, price, absoluteChange, percentageChange, history);
             detailStockIntent.putExtra(DETAIL_STOCK_QUOTE, stockQuote);
+
+            dbQuote.close();
         }
 
         startActivity(detailStockIntent);

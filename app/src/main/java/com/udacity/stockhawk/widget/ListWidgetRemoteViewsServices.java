@@ -2,27 +2,19 @@ package com.udacity.stockhawk.widget;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
-import android.util.Log;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
-import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.model.StockQuote;
+import com.udacity.stockhawk.ui.MainActivity;
 
-import java.lang.annotation.Target;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-
-import timber.log.Timber;
 
 public class ListWidgetRemoteViewsServices extends RemoteViewsService {
 
@@ -49,7 +41,7 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                         Contract.Quote.QUOTE_COLUMNS.toArray(new String[] {}),
                         null,
                         null,
-                        Contract.Quote._ID + " ASC");
+                        Contract.Quote.COLUMN_SYMBOL);
                 Binder.restoreCallingIdentity(identityToken);
             }
 
@@ -75,6 +67,7 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                 RemoteViews views = new RemoteViews(getPackageName(),
                         R.layout.widget_list_item);
 
+                long id = data.getLong(Contract.Quote.POSITION_ID);
                 String symbol = data.getString(Contract.Quote.POSITION_SYMBOL);
 
                 DecimalFormat dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
@@ -82,10 +75,14 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                 dollarFormatWithPlus.setPositivePrefix("+$");
 
                 float price = data.getFloat(Contract.Quote.POSITION_PRICE);
-                float change = data.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+                float absoluteChange = data.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+                float percentageChange = data.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+                String history = data.getString(Contract.Quote.POSITION_HISTORY);
+
+                StockQuote quote = new StockQuote(id, symbol, price, absoluteChange, percentageChange, history);
 
                 String priceFormatted = dollarFormat.format(price);
-                String changeFormatted = dollarFormatWithPlus.format(change);
+                String changeFormatted = dollarFormatWithPlus.format(absoluteChange);
 
                 views.setTextViewText(R.id.widget_list_symbol, symbol);
                 views.setContentDescription(R.id.widget_list_symbol, symbol);
@@ -96,10 +93,16 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                 views.setTextViewText(R.id.widget_list_change, changeFormatted);
                 views.setContentDescription(R.id.widget_list_change, changeFormatted);
 
+                if (absoluteChange > 0) {
+                    views.setInt(R.id.widget_list_change, "setBackgroundResource", R.drawable.percent_change_pill_green);
+                } else {
+                    views.setInt(R.id.widget_list_change, "setBackgroundResource",R.drawable.percent_change_pill_red);
+                }
+
                 final Intent fillInIntent = new Intent();
-                Uri quoteUri = Contract.Quote.makeUriForStock(symbol);
-                fillInIntent.setData(quoteUri);
-                views.setOnClickFillInIntent(R.id.widget_list_main, fillInIntent);
+                fillInIntent.putExtra(MainActivity.DETAIL_STOCK_QUOTE, quote);
+
+                views.setOnClickFillInIntent(R.id.widget_list_item_main, fillInIntent);
                 return views;
             }
 
