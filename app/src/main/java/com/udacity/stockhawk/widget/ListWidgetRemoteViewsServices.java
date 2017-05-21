@@ -50,15 +50,6 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                         null,
                         null,
                         Contract.Quote._ID + " ASC");
-                /*if (data.getCount() == 0) {
-                    RemoteViews views = new RemoteViews(getPackageName(),
-                            R.layout.widget_list_item);
-                    views.setViewVisibility(R.id.widget_no_data_message, View.VISIBLE);
-                } else {
-                    RemoteViews views = new RemoteViews(getPackageName(),
-                            R.layout.widget_list_item);
-                    views.setViewVisibility(R.id.widget_no_data_message, View.INVISIBLE);
-                }*/
                 Binder.restoreCallingIdentity(identityToken);
             }
 
@@ -111,8 +102,6 @@ public class ListWidgetRemoteViewsServices extends RemoteViewsService {
                 views.setOnClickFillInIntent(R.id.widget_list_main, fillInIntent);
                 return views;
             }
-
-
 
             @Override
             public RemoteViews getLoadingView() {

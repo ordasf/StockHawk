@@ -105,7 +105,8 @@ public class DetailStockActivity extends AppCompatActivity {
                 dateLabels[i] = DateFormat.format("dd/MM/yyyy", Long.parseLong(historicQuote[0])).toString();
                 entries.add(new Entry(i, Float.parseFloat(historicQuote[1])));
             }
-            LineDataSet dataSet = new LineDataSet(entries, "caca");
+            String message = getString(R.string.chart_label);
+            LineDataSet dataSet = new LineDataSet(entries, message);
             dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
             LineData lineData = new LineData(dataSet);
             lineChart.setData(lineData);
